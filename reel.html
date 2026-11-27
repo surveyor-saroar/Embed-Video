@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Facebook Reel Embed</title>
+  <title>Animated Reel Card</title>
   <style>
     * {
       box-sizing: border-box;
@@ -16,16 +16,106 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 24px 12px;
-      background: linear-gradient(135deg, #0f172a, #1e293b);
+      padding: 20px;
+      background: radial-gradient(circle at top, #1e293b, #090d16);
       font-family: system-ui, -apple-system, sans-serif;
     }
 
-    .reel-wrapper {
+    /* অ্যানিমেটেড কার্ড কন্টেইনার */
+    .reel-card {
+      position: relative;
       width: 100%;
-      max-width: 500px;
+      max-width: 374px;
+      padding: 12px;
+      border-radius: 20px;
+      background: rgba(15, 23, 42, 0.85);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.6), 0 0 25px rgba(56, 189, 248, 0.25);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      overflow: hidden;
+
+      /* পেইজ লোড এন্ট্রান্স ও হালকা ফ্লোটিং অ্যানিমেশন */
+      animation: cardEnter 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+                 floatCard 4s ease-in-out 0.8s infinite;
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+    }
+
+    /* মাউস হোভার করলে কার্ড হালকা জুম ও গ্লো হবে */
+    .reel-card:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 26px 55px rgba(0, 0, 0, 0.75), 0 0 35px rgba(250, 204, 21, 0.35);
+      border-color: rgba(250, 204, 21, 0.6);
+    }
+
+    /* কার্ডের ওপরে ছোট হেডার ব্যাজ */
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 0 4px;
+      color: #f8fafc;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(250, 204, 21, 0.15);
+      color: #facc15;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+    }
+
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #facc15;
+      animation: pulseDot 1.4s infinite;
+    }
+
+    /* এম্বেড প্লেয়ার র‍্যাপার */
+    .video-box {
+      width: 100%;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #000;
       display: flex;
       justify-content: center;
+    }
+
+    @keyframes cardEnter {
+      from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes floatCard {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-6px);
+      }
+    }
+
+    @keyframes pulseDot {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.4;
+        transform: scale(1.4);
+      }
     }
   </style>
 </head>
@@ -33,14 +123,21 @@
   <!-- Facebook JavaScript SDK -->
   <div id="fb-root"></div>
   <script async defer crossorigin="anonymous"
-    src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v27.0"></script>
+    src="https://connect.facebook.net/bn_IN/sdk.js#xfbml=1&version=v27.0"></script>
 
-  <!-- Embedded Facebook Reel -->
-  <div class="reel-wrapper">
-    <div class="fb-post"
-         data-href="https://www.facebook.com/reel/1443055264646735"
-         data-width="500"
-         data-show-text="true">
+  <!-- Animated Video Card -->
+  <div class="reel-card">
+    <div class="card-header">
+      <span>Featured Reel</span>
+      <span class="live-badge"><span class="live-dot"></span> WATCH</span>
+    </div>
+
+    <div class="video-box">
+      <div class="fb-post"
+           data-href="https://www.facebook.com/reel/1443055264646735"
+           data-width="350"
+           data-show-text="false">
+      </div>
     </div>
   </div>
 </body>
