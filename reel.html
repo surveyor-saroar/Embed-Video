@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Auto 2-Scene Reel Card (3:3 -> 3:2)</title>
+  <title>Auto Dual Scene Reel Cards (3:3 Left Still + 3:2 Enter)</title>
   <style>
     * {
       box-sizing: border-box;
@@ -19,44 +19,72 @@
       padding: 20px;
       background: radial-gradient(circle at top, #1e293b, #090d16);
       font-family: system-ui, -apple-system, sans-serif;
+      overflow-x: auto;
+    }
+
+    /* দুটি কার্ড পাশাপাশি রাখার কন্টেইনার */
+    .stage {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      width: 100%;
+      max-width: 1120px;
+      transition: all 0.55s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
     .reel-card {
-      width: 100%;
-      max-width: 440px;
+      flex-shrink: 0;
       background: #111827;
       border: 1px solid rgba(255, 255, 255, 0.14);
       border-radius: 22px;
       padding: 14px;
       box-shadow: 0 24px 55px rgba(0, 0, 0, 0.7);
       overflow: hidden;
-      transition: max-width 0.45s ease, box-shadow 0.35s ease, border-color 0.35s ease;
     }
 
-    /* দ্বিতীয় সিন: 3:2 কার্ড */
-    .reel-card.mode-3x2 {
-      max-width: 600px;
+    /* প্রথম কার্ড: 3/3 */
+    .card-scene-1 {
+      width: 100%;
+      max-width: 390px;
+      transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+                  border-color 0.4s ease,
+                  box-shadow 0.4s ease;
+    }
+
+    /* ৫ সেকেন্ড পর একটু বামে সরে স্টিল থাকবে */
+    .card-scene-1.shifted-left {
+      transform: translateX(-14px);
+      border-color: rgba(56, 189, 248, 0.45);
+      box-shadow: 0 24px 55px rgba(0, 0, 0, 0.75);
+    }
+
+    /* দ্বিতীয় কার্ড: 3/2 (শুরুতে লুকানো, পরে পপ-আপে প্রবেশ করবে) */
+    .card-scene-2 {
+      display: none;
+      width: 100%;
+      max-width: 540px;
       border-color: rgba(250, 204, 21, 0.45);
       box-shadow: 0 28px 65px rgba(0, 0, 0, 0.8), 0 0 28px rgba(250, 204, 21, 0.2);
     }
 
-    /* পপ-আপ ট্রানজিশন অ্যানিমেশন */
-    .pop-transition {
-      animation: popUpReveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    .card-scene-2.active {
+      display: block;
+      animation: popEnterRight 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     }
 
-    @keyframes popUpReveal {
+    @keyframes popEnterRight {
       0% {
         opacity: 0;
-        transform: scale(0.75) translateY(24px);
+        transform: scale(0.76) translateX(45px);
       }
       70% {
         opacity: 1;
-        transform: scale(1.03) translateY(-4px);
+        transform: scale(1.03) translateX(-4px);
       }
       100% {
         opacity: 1;
-        transform: scale(1) translateY(0);
+        transform: scale(1) translateX(0);
       }
     }
 
@@ -80,8 +108,12 @@
       user-select: none;
     }
 
-    /* ভিডিও ফ্রেম: প্রথম ৫ সেকেন্ড 3/3, এরপর 3/2 */
-    .video-frame {
+    .status-pill.still-pill {
+      background: rgba(56, 189, 248, 0.18);
+      color: #38bdf8;
+    }
+
+    .video-square {
       position: relative;
       width: 100%;
       aspect-ratio: 3 / 3;
@@ -91,19 +123,38 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      transition: aspect-ratio 0.45s ease;
     }
 
-    .video-frame.ratio-3x2 {
+    .video-3x2 {
+      position: relative;
+      width: 100%;
       aspect-ratio: 3 / 2;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
-    .video-frame .fb-post,
-    .video-frame .fb-post span,
-    .video-frame .fb-post iframe {
+    .video-square .fb-post,
+    .video-square .fb-post span,
+    .video-square .fb-post iframe,
+    .video-3x2 .fb-post,
+    .video-3x2 .fb-post span,
+    .video-3x2 .fb-post iframe {
       width: 100% !important;
       height: 100% !important;
       max-width: 100% !important;
+    }
+
+    @media (max-width: 900px) {
+      .stage {
+        flex-direction: column;
+      }
+      .card-scene-1.shifted-left {
+        transform: translateX(0);
+      }
     }
   </style>
 </head>
@@ -113,31 +164,46 @@
   <script async defer crossorigin="anonymous"
     src="https://connect.facebook.net/bn_IN/sdk.js#xfbml=1&version=v27.0"></script>
 
-  <!-- অটো সিন কার্ড -->
-  <div class="reel-card" id="reelCard">
-    <div class="card-header">
-      <span id="sceneTitle">Scene 1 • 3/3 Card</span>
-      <span class="status-pill" id="statusPill">3:3 (5s)</span>
+  <div class="stage" id="stage">
+    <!-- প্রথম সিন কার্ড (3/3) -->
+    <div class="reel-card card-scene-1" id="cardScene1">
+      <div class="card-header">
+        <span>Scene 1 • 3/3 Card</span>
+        <span class="status-pill" id="pillScene1">RUNNING (5s)</span>
+      </div>
+      <div class="video-square">
+        <div class="fb-post"
+             data-href="https://www.facebook.com/reel/1443055264646735"
+             data-width="400"
+             data-show-text="false"
+             data-autoplay="true">
+        </div>
+      </div>
     </div>
 
-    <div class="video-frame" id="videoFrame">
-      <div class="fb-post"
-           data-href="https://www.facebook.com/reel/1443055264646735"
-           data-width="500"
-           data-show-text="false"
-           data-autoplay="true">
+    <!-- দ্বিতীয় সিন কার্ড (3/2) -->
+    <div class="reel-card card-scene-2" id="cardScene2">
+      <div class="card-header">
+        <span>Scene 2 • 3/2 Card</span>
+        <span class="status-pill" id="pillScene2">POP-UP 3:2</span>
+      </div>
+      <div class="video-3x2">
+        <div class="fb-post"
+             data-href="https://www.facebook.com/reel/1443055264646735"
+             data-width="520"
+             data-show-text="false"
+             data-autoplay="true">
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    const reelCard = document.getElementById("reelCard");
-    const sceneTitle = document.getElementById("sceneTitle");
-    const videoFrame = document.getElementById("videoFrame");
-    const statusPill = document.getElementById("statusPill");
+    const cardScene1 = document.getElementById("cardScene1");
+    const cardScene2 = document.getElementById("cardScene2");
+    const pillScene1 = document.getElementById("pillScene1");
 
-    // প্রথম সিন ৫ সেকেন্ড (৫০০০ মিলিসেকেন্ড), এরপর বাকি পুরো সময় দ্বিতীয় সিন
-    const SCENE_1_DURATION = 5000;
+    const SCENE_1_DURATION = 5000; // ৫ সেকেন্ড
 
     let audioCtx = null;
 
@@ -177,26 +243,27 @@
       } catch (_) {}
     }
 
-    function triggerPopAnimation() {
-      reelCard.classList.remove("pop-transition");
-      void reelCard.offsetWidth;
-      reelCard.classList.add("pop-transition");
-      playPopSound();
-    }
+    function runSimultaneousTransition() {
+      // প্রথম কার্ড একটু বামে সরে স্ক্রিনে স্টিল থাকবে
+      cardScene1.classList.add("shifted-left");
+      pillScene1.textContent = "STILL LEFT";
+      pillScene1.classList.add("still-pill");
 
-    function switchToScene2() {
-      reelCard.classList.add("mode-3x2");
-      videoFrame.classList.add("ratio-3x2");
-      sceneTitle.textContent = "Scene 2 • 3/2 Card";
-      statusPill.textContent = "3:2 ACTIVE";
-      triggerPopAnimation();
+      // সাথে সাথে দ্বিতীয় কার্ড (3/2) পপ-আপ সাউন্ডসহ প্রবেশ করবে ও উভয় একসাথে রান করবে
+      cardScene2.classList.add("active");
+      playPopSound();
+
+      // নতুন যুক্ত হওয়া XFBML এলিমেন্ট রেন্ডার করার চেষ্টা
+      if (window.FB && window.FB.XFBML && typeof window.FB.XFBML.parse === "function") {
+        window.FB.XFBML.parse(cardScene2);
+      }
     }
 
     window.addEventListener("load", () => {
       initAudio();
 
       setTimeout(() => {
-        switchToScene2();
+        runSimultaneousTransition();
       }, SCENE_1_DURATION);
     });
   </script>
