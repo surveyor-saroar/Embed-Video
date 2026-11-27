@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Auto 2-Scene Reel Card (3:3 -> 2:5)</title>
+  <title>Auto 2-Scene Reel Card (3:3 -> 5:2)</title>
   <style>
     * {
       box-sizing: border-box;
@@ -33,8 +33,9 @@
       transition: max-width 0.45s ease, box-shadow 0.35s ease, border-color 0.35s ease;
     }
 
-    .reel-card.mode-2x5 {
-      max-width: 340px;
+    /* দ্বিতীয় সিন: চওড়া 5:2 কার্ড */
+    .reel-card.mode-5x2 {
+      max-width: 720px;
       border-color: rgba(250, 204, 21, 0.45);
       box-shadow: 0 28px 65px rgba(0, 0, 0, 0.8), 0 0 28px rgba(250, 204, 21, 0.2);
     }
@@ -47,11 +48,11 @@
     @keyframes popUpReveal {
       0% {
         opacity: 0;
-        transform: scale(0.72) translateY(26px);
+        transform: scale(0.75) translateY(24px);
       }
       70% {
         opacity: 1;
-        transform: scale(1.04) translateY(-4px);
+        transform: scale(1.03) translateY(-4px);
       }
       100% {
         opacity: 1;
@@ -79,7 +80,7 @@
       user-select: none;
     }
 
-    /* ভিডিও ফ্রেম: শুরুতে 3/3, অটো-সুইচে 2/5 */
+    /* ভিডিও ফ্রেম: প্রথম ৩ সেকেন্ড 3/3, এরপর 5/2 */
     .video-frame {
       position: relative;
       width: 100%;
@@ -93,8 +94,8 @@
       transition: aspect-ratio 0.45s ease;
     }
 
-    .video-frame.ratio-2x5 {
-      aspect-ratio: 2 / 5;
+    .video-frame.ratio-5x2 {
+      aspect-ratio: 5 / 2;
     }
 
     .video-frame .fb-post,
@@ -116,13 +117,13 @@
   <div class="reel-card" id="reelCard">
     <div class="card-header">
       <span id="sceneTitle">Scene 1 • 3/3 Card</span>
-      <span class="status-pill" id="statusPill">AUTO 3:3</span>
+      <span class="status-pill" id="statusPill">3:3 (3s)</span>
     </div>
 
     <div class="video-frame" id="videoFrame">
       <div class="fb-post"
            data-href="https://www.facebook.com/reel/1443055264646735"
-           data-width="400"
+           data-width="500"
            data-show-text="false"
            data-autoplay="true">
       </div>
@@ -135,83 +136,11 @@
     const videoFrame = document.getElementById("videoFrame");
     const statusPill = document.getElementById("statusPill");
 
-    // সময় সেটিংস (মিলিসেকেন্ডে)
-    const SCENE_1_DURATION = 5000; // ৫ সেকেন্ড পর Scene 2 (2/5)-এ যাবে
-    const LOOP_BACK = false;        // true করলে আবার 3/3-এ ফিরে লুপ হবে
+    // প্রথম সিন ঠিক ৩ সেকেন্ড (৩০০০ মিলিসেকেন্ড), এরপর বাকি পুরো সময় দ্বিতীয় সিন
+    const SCENE_1_DURATION = 3000;
 
     let audioCtx = null;
 
     function initAudio() {
       try {
         if (!audioCtx) {
-          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-          audioCtx = new AudioContextClass();
-        }
-        if (audioCtx.state === "suspended") {
-          audioCtx.resume();
-        }
-      } catch (_) {}
-    }
-
-    function playPopSound() {
-      initAudio();
-      if (!audioCtx || audioCtx.state !== "running") return;
-
-      try {
-        const now = audioCtx.currentTime;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-
-        osc.type = "sine";
-        osc.frequency.setValueAtTime(280, now);
-        osc.frequency.exponentialRampToValueAtTime(640, now + 0.14);
-
-        gain.gain.setValueAtTime(0.001, now);
-        gain.gain.linearRampToValueAtTime(0.14, now + 0.02);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start(now);
-        osc.stop(now + 0.19);
-      } catch (_) {}
-    }
-
-    function triggerPopAnimation() {
-      reelCard.classList.remove("pop-transition");
-      void reelCard.offsetWidth;
-      reelCard.classList.add("pop-transition");
-      playPopSound();
-    }
-
-    function applyScene(sceneNumber) {
-      if (sceneNumber === 2) {
-        reelCard.classList.add("mode-2x5");
-        videoFrame.classList.add("ratio-2x5");
-        sceneTitle.textContent = "Scene 2 • 2/5 Card";
-        statusPill.textContent = "AUTO 2:5";
-      } else {
-        reelCard.classList.remove("mode-2x5");
-        videoFrame.classList.remove("ratio-2x5");
-        sceneTitle.textContent = "Scene 1 • 3/3 Card";
-        statusPill.textContent = "AUTO 3:3";
-      }
-      triggerPopAnimation();
-    }
-
-    window.addEventListener("load", () => {
-      initAudio();
-
-      setTimeout(() => {
-        applyScene(2);
-
-        if (LOOP_BACK) {
-          setTimeout(() => {
-            applyScene(1);
-          }, SCENE_1_DURATION);
-        }
-      }, SCENE_1_DURATION);
-    });
-  </script>
-</body>
-</html>
