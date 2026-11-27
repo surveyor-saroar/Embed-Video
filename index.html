@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Facebook Reel Embed</title>
+  <title>Facebook Reel Card</title>
   <style>
     * {
       box-sizing: border-box;
@@ -16,14 +16,51 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 24px 12px;
+      padding: 20px;
       background: linear-gradient(135deg, #0f172a, #1e293b);
       font-family: system-ui, -apple-system, sans-serif;
     }
 
-    .reel-wrapper {
+    .reel-card {
       width: 100%;
-      max-width: 500px;
+      max-width: 390px;
+      background: #111827;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .reel-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 26px 55px rgba(0, 0, 0, 0.7);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #f9fafb;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      padding: 0 4px;
+    }
+
+    .card-badge {
+      font-size: 11px;
+      background: rgba(250, 204, 21, 0.16);
+      color: #facc15;
+      padding: 3px 9px;
+      border-radius: 999px;
+    }
+
+    .video-frame {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
       display: flex;
       justify-content: center;
     }
@@ -33,14 +70,21 @@
   <!-- Facebook JavaScript SDK -->
   <div id="fb-root"></div>
   <script async defer crossorigin="anonymous"
-    src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v27.0"></script>
+    src="https://connect.facebook.net/bn_IN/sdk.js#xfbml=1&version=v27.0"></script>
 
-  <!-- Embedded Facebook Reel -->
-  <div class="reel-wrapper">
-    <div class="fb-post"
-         data-href="https://www.facebook.com/reel/1443055264646735"
-         data-width="500"
-         data-show-text="true">
+  <!-- কার্ড কন্টেইনার -->
+  <div class="reel-card">
+    <div class="card-top">
+      <span>Facebook Reel</span>
+      <span class="card-badge">VIDEO</span>
+    </div>
+
+    <div class="video-frame">
+      <div class="fb-post"
+           data-href="https://www.facebook.com/reel/1443055264646735"
+           data-width="350"
+           data-show-text="false">
+      </div>
     </div>
   </div>
 </body>
