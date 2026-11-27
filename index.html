@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Auto 2-Scene Reel Card (3:3 -> 5:2)</title>
+  <title>Auto 2-Scene Reel Card (3:3 -> 3:2)</title>
   <style>
     * {
       box-sizing: border-box;
@@ -33,9 +33,9 @@
       transition: max-width 0.45s ease, box-shadow 0.35s ease, border-color 0.35s ease;
     }
 
-    /* দ্বিতীয় সিন: চওড়া 5:2 কার্ড */
-    .reel-card.mode-5x2 {
-      max-width: 720px;
+    /* দ্বিতীয় সিন: 3:2 কার্ড */
+    .reel-card.mode-3x2 {
+      max-width: 600px;
       border-color: rgba(250, 204, 21, 0.45);
       box-shadow: 0 28px 65px rgba(0, 0, 0, 0.8), 0 0 28px rgba(250, 204, 21, 0.2);
     }
@@ -80,7 +80,7 @@
       user-select: none;
     }
 
-    /* ভিডিও ফ্রেম: প্রথম ৩ সেকেন্ড 3/3, এরপর 5/2 */
+    /* ভিডিও ফ্রেম: প্রথম ৫ সেকেন্ড 3/3, এরপর 3/2 */
     .video-frame {
       position: relative;
       width: 100%;
@@ -94,8 +94,8 @@
       transition: aspect-ratio 0.45s ease;
     }
 
-    .video-frame.ratio-5x2 {
-      aspect-ratio: 5 / 2;
+    .video-frame.ratio-3x2 {
+      aspect-ratio: 3 / 2;
     }
 
     .video-frame .fb-post,
@@ -117,7 +117,7 @@
   <div class="reel-card" id="reelCard">
     <div class="card-header">
       <span id="sceneTitle">Scene 1 • 3/3 Card</span>
-      <span class="status-pill" id="statusPill">3:3 (3s)</span>
+      <span class="status-pill" id="statusPill">3:3 (5s)</span>
     </div>
 
     <div class="video-frame" id="videoFrame">
@@ -136,11 +136,69 @@
     const videoFrame = document.getElementById("videoFrame");
     const statusPill = document.getElementById("statusPill");
 
-    // প্রথম সিন ঠিক ৩ সেকেন্ড (৩০০০ মিলিসেকেন্ড), এরপর বাকি পুরো সময় দ্বিতীয় সিন
-    const SCENE_1_DURATION = 3000;
+    // প্রথম সিন ৫ সেকেন্ড (৫০০০ মিলিসেকেন্ড), এরপর বাকি পুরো সময় দ্বিতীয় সিন
+    const SCENE_1_DURATION = 5000;
 
     let audioCtx = null;
 
     function initAudio() {
       try {
         if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          audioCtx = new AudioContextClass();
+        }
+        if (audioCtx.state === "suspended") {
+          audioCtx.resume();
+        }
+      } catch (_) {}
+    }
+
+    function playPopSound() {
+      initAudio();
+      if (!audioCtx || audioCtx.state !== "running") return;
+
+      try {
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(280, now);
+        osc.frequency.exponentialRampToValueAtTime(640, now + 0.14);
+
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(0.14, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.19);
+      } catch (_) {}
+    }
+
+    function triggerPopAnimation() {
+      reelCard.classList.remove("pop-transition");
+      void reelCard.offsetWidth;
+      reelCard.classList.add("pop-transition");
+      playPopSound();
+    }
+
+    function switchToScene2() {
+      reelCard.classList.add("mode-3x2");
+      videoFrame.classList.add("ratio-3x2");
+      sceneTitle.textContent = "Scene 2 • 3/2 Card";
+      statusPill.textContent = "3:2 ACTIVE";
+      triggerPopAnimation();
+    }
+
+    window.addEventListener("load", () => {
+      initAudio();
+
+      setTimeout(() => {
+        switchToScene2();
+      }, SCENE_1_DURATION);
+    });
+  </script>
+</body>
+</html>
