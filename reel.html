@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Facebook Reel Card</title>
+  <title>3x3 Facebook Reel Card</title>
   <style>
     * {
       box-sizing: border-box;
@@ -21,23 +21,24 @@
       font-family: system-ui, -apple-system, sans-serif;
     }
 
-    .reel-card {
+    .card-3x3 {
       width: 100%;
-      max-width: 390px;
+      max-width: 440px;
       background: #111827;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 20px;
       padding: 14px;
-      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
+      box-shadow: 0 22px 50px rgba(0, 0, 0, 0.65);
+      overflow: hidden;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .reel-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 26px 55px rgba(0, 0, 0, 0.7);
+    .card-3x3:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 28px 60px rgba(0, 0, 0, 0.75);
     }
 
-    .card-top {
+    .card-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -48,21 +49,33 @@
       padding: 0 4px;
     }
 
-    .card-badge {
+    .card-tag {
       font-size: 11px;
       background: rgba(250, 204, 21, 0.16);
       color: #facc15;
-      padding: 3px 9px;
+      padding: 3px 10px;
       border-radius: 999px;
     }
 
-    .video-frame {
+    /* ৩:৩ বর্গাকার ভিডিও ফ্রেম */
+    .video-square {
+      position: relative;
       width: 100%;
-      border-radius: 12px;
+      aspect-ratio: 3 / 3;
+      border-radius: 14px;
       overflow: hidden;
       background: #000;
       display: flex;
       justify-content: center;
+      align-items: center;
+    }
+
+    .video-square .fb-post,
+    .video-square .fb-post span,
+    .video-square .fb-post iframe {
+      width: 100% !important;
+      height: 100% !important;
+      max-width: 100% !important;
     }
   </style>
 </head>
@@ -72,17 +85,17 @@
   <script async defer crossorigin="anonymous"
     src="https://connect.facebook.net/bn_IN/sdk.js#xfbml=1&version=v27.0"></script>
 
-  <!-- কার্ড কন্টেইনার -->
-  <div class="reel-card">
-    <div class="card-top">
+  <!-- 3/3 কার্ড -->
+  <div class="card-3x3">
+    <div class="card-header">
       <span>Facebook Reel</span>
-      <span class="card-badge">VIDEO</span>
+      <span class="card-tag">3:3 CARD</span>
     </div>
 
-    <div class="video-frame">
+    <div class="video-square">
       <div class="fb-post"
            data-href="https://www.facebook.com/reel/1443055264646735"
-           data-width="350"
+           data-width="400"
            data-show-text="false">
       </div>
     </div>
